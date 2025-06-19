@@ -95,11 +95,8 @@ docker run -it --rm \
 
 echo
 echo "(AE Script - E3) Analysis of completed-1280.xml:"
-echo "(AE Script - E3) This state machine shows critical vulnerabilities:"
-echo "(AE Script - E3) 1. Accepts mixed ClientHello types - allows switching between RSA, DH, and EC mid-handshake"
-echo "(AE Script - E3) 2. Multiple padding oracle vulnerabilities detected with different error behaviors"
-echo "(AE Script - E3) 3. Bleichenbacher attack paths through improper RSA handling after DH ClientHello"
-echo "(AE Script - E3) 4. DivergingPaddingOracleVulnerability - timing/response differences reveal padding validity"
-echo "(AE Script - E3) This implementation is vulnerable to multiple cryptographic attacks."
+echo "(AE Script - E3) This state machine exhibit distinct behavior patterns for different padding oracle test vectors."
+echo "(AE Script - E3) For some vectors, it does not send an alert before closing the connection."
+echo "(AE Script - E3) This state machine further accepts duplicate ClientHello messages during the handshake."
 echo "(AE Script - E3) This is the end of E3. Press Enter to close."
 read -r
