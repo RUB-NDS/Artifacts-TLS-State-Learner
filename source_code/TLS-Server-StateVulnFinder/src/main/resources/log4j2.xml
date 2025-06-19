@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n" />
+        </Console>
+
+        <File name="logfile" fileName="logs/app.log" append="true">
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n" />
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="logfile" />
+        </Root>
+        
+        <Logger name="de.rub.nds.scanner" level="error" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="logfile" />
+        </Logger>
+        
+        <Logger name="de.rub.nds.tlsscanner" level="error" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="logfile" />
+        </Logger>
+        
+        <Logger name="de.rub.nds.tlsattacker" level="error" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="logfile" />
+        </Logger>
+        
+        <Logger name="de.rub.nds.modifiablevariable" level="error" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="logfile" />
+        </Logger>
+    </Loggers>
+</Configuration>

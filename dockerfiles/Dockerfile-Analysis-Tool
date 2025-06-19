@@ -1,0 +1,26 @@
+# Build stage for Maven project
+FROM maven:3.8.6-openjdk-11-slim AS maven-builder
+
+WORKDIR /build
+COPY source_code/ /build/
+
+# Build the project
+RUN mvn clean package -Dspotless.apply.skip
+
+# Runtime stage
+FROM alpine:3.19
+
+# Install Java 11 and graphviz
+RUN apk update && apk add --no-cache openjdk11-jre graphviz
+
+# Create working directory
+WORKDIR /app
+
+# Copy the apps folder from the build stage
+COPY --from=maven-builder /build/apps/ /app/apps/
+
+# Set the working directory to apps folder
+WORKDIR /app/apps
+
+# Set the entrypoint to run the analysis tool with passed parameters
+ENTRYPOINT ["java", "-jar", "State-Machine-Analysis-Tool.jar"]
