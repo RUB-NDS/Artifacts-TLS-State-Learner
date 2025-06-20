@@ -5,9 +5,11 @@ echo
 
 echo
 echo "(AE Script - E1) This experiment will first derive a state machine for OpenSSL 3.4.0 using the docker image unless this was already done during the setup."
-echo "(AE Script - E1) Subsequently, this experiment is using our CLI tool which helps to navigate through an obtained state machine."
-echo "(AE Script - E1) In particular, the CLI tool will be used to re-run our automated analysis. This experiment hence is intended to support our claims C1 and C2."
-echo
+echo "(AE Script - E1) Subsequently, this experiment is using our CLI tool to illustrate some of the findings."
+echo "(AE Script - E1) Note that the CLI tool is technically not required to prove our claims as the state machine extraction and analysis are integrated into the state learner itself."
+echo "(AE Script - E1) We will hence only discuss features of the CLI tool which help to point out flaws in the state machines obtained in the experiments."
+echo "(AE Script - E1) In particular, the CLI tool will be used to re-run our automated analysis. This experiment is intended to support our claims C1 and C2."
+
 
 # Expected files from setup.sh
 E1_XML="experiment_outputs/E1/alphabet-13/OpenSSL3.4.0.xml"
@@ -60,7 +62,7 @@ docker run -it --rm \
     -f /workspace/$E1_XML
 
 echo
-echo "(AE Script - E1) This is the output of the 'analyze' command which executes the automated analysis."
+echo "(AE Script - E1) This is the output of the CLI tool's 'analyze' command which executes our automated analysis."
 echo "(AE Script - E1) For this version of OpenSSL, it should indicate no issues beyond Internal Error alerts sent in one state."
 echo "(AE Script - E1) We tracked these alerts in particular as they may point towards issues in the code stack."
 echo "(AE Script - E1) For comparison with other state machines shown in E2 and E3, we will now iterate through the state machine."
