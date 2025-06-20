@@ -85,9 +85,10 @@ The script will:
 
 **Expected Results:** 
 - The automated analysis should report no issues beyond Internal Error alerts
-- Correct rejection of duplicate ClientHello with Unexpected Message alert
-- Proper rejection of unsolicited client certificates
+- Correct rejection of duplicate ClientHello with Unexpected Message alert is shown
+- Proper rejection of unsolicited client certificates is shown
 - A simplified visualization of the obtained state machine at `experiment_outputs/E1/alphabet-13/OpenSSL3.4.0_short.pdf`
+- A simplified visualization for a smaller alphabet, resulting in a less extensive state machine, at `experiment_outputs/E1/alphabet-1/OpenSSL3.4.0_short.pdf`
 
 ### E2: Illustrating issue detection based on OpenSSL 1.0.1j
 **Time:** 10 human-minutes + 10 compute-minutes
