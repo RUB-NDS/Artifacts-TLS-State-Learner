@@ -6,6 +6,8 @@ set -e
 echo "=== Artifact Evaluation - Preparation ==="
 echo
 echo "This script will build docker images and attempt to perform a basic test by running a docker container. This docker container will run tmux with two panes showing OpenSSL on the left and our tool on the right."
+echo "Press Enter to begin the setup."
+read -r
 
 # Function to check if command was successful
 check_status() {
