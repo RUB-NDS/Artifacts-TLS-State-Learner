@@ -130,5 +130,19 @@ The script analyzes three state machines:
 - NetScaler accepting duplicate ClientHellos (similar to E2)
 - Improper certificate handling allowing unauthorized certificates
 - Padding oracle vulnerabilities with behavioral differences for different padding types
-- Each analysis includes interactive traces showing the specific vulnerability paths
+- Each analysis includes traces showing the specific message paths leading to issues
 - The variety of issues found supports the prevalence of state machine bugs in real-world deployments
+
+## Notes on Reusability
+
+**Scope:** In both E1 and E2, we configure the docker container to run our state learner tool to perform 20,000 random word queries per state when conducting the equivalence tests. In our study, we used 42,000 random queries. To conduct the experiment with the same extent of equivalence tests, the `-queries` parameter of the respective shellscript can be adjusted. For E2, we further limit the execution to the first alphabet. Deleting the `-alphabetLimit` parameter from the shellscript will result in a full execution. Note that extracting the full OpenSSL 1.0.1j takes significantly longer than extracting the state machine of OpenSSL 3.4.0.
+
+**Inspecting the Dataset:** To inspect more of the state machines we collected, please refer to any of the docker run commands for the CLI tool given in `experiments/E3.sh` and adapt the file path (`-f`) to point to another state machine XML file.
+
+**Tools:** For applying our state learner to other targets, we recommend to use the flags from E1 or E2 as guidelines as these parameters reflect how we used the tool for our study. Additionally, both the state learner and the state machine analysis tool provide a brief help functionality to guide users through their features.
+
+- **State Learner**: Access help by running the tool with the `-h` or `--help` flag. This displays all available command-line options, including configuration parameters for alphabet selection, learning algorithms, and output formats.
+
+- **State Machine Analysis Tool**: Once in the interactive shell, type `help` to see all available commands. For detailed information about a specific command, use `help <command>`. Additionally, launching the tool with `--help` provides command-line usage options.
+
+**Build:** Building the project outside of the docker image should only require Maven and a Java Development Kit. Please note that Java 11 is required to run the resulting Jars as some dependencies used in our project are not compatible with newer Java versions.
