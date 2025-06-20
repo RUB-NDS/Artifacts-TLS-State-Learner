@@ -287,10 +287,10 @@ public class ShortMealyVisualizationHelper
             properties.put(NodeAttrs.STYLE, "bold");
             properties.put(NodeAttrs.COLOR, getColorForKnownNode(node));
         } else if (detail == VisualizationDetail.SHORT || detail == VisualizationDetail.MEDIUM) {
-            // this node seems to be invalid
+            // this node has no name associated - the anylsis result will indicate if it is critical or not
             properties.put(NodeAttrs.COLOR, "RED");
             properties.put(NodeAttrs.STYLE, "bold");
-            properties.put(NodeAttrs.LABEL, "INVALID" + "(" + node + ")");
+            properties.put(NodeAttrs.LABEL, "Unlabeled" + "(" + node + ")");
         }
         // we want to render the node
         properties.put(NodeAttrs.FIXEDSIZE, "true");

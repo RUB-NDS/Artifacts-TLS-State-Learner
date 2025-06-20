@@ -97,6 +97,13 @@ echo "(AE Script - E1) Note that the server did not send a CertificateRequest in
 echo "(AE Script - E1) As noted in the RFC, the client is thus not allowed to send a Certificate message:"
 echo "(AE Script - E1) 'This message is only sent if the server requests a certificate.' - RFC 5246 7.4.6.  Client Certificate"
 echo "(AE Script - E1) The output should indicate that OpenSSL correctly rejected this message with an Unexpected Message alert again."
-echo "(AE Script - E1) This is the end of E1. You can take a look at experiment_outputs/E1/alphabet-13/OpenSSL3.4.0_short.pdf for a simplified visualization of the state machine."
-echo "(AE Script - E1) Press Enter to close."
+echo "(AE Script - E1) Press Enter to continue."
+read -r
+
+echo
+echo "(AE Script - E1) You can take a look at experiment_outputs/E1/alphabet-13/OpenSSL3.4.0_short.pdf for a simplified visualization of the state machine."
+echo "(AE Script - E1) As stated in C1, our tool iterates over increasingly larger alphabets to refine the state machine."
+echo "(AE Script - E1) To compare the extent to the state machine of a smaller alphabet, you can inspect experiment_outputs/E1/alphabet-1/OpenSSL3.4.0_short.pdf"
+echo "(AE Script - E1) Basic stats on the execution time and required queries for the individual alphabet should be written to experiment_outputs/E1/app.log"
+echo "(AE Script - E1) This is the end of E1. Press Enter to close."
 read -r
