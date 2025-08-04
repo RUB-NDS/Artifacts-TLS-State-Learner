@@ -92,6 +92,7 @@ public class ServerContextPropertyContainer extends ContextPropertyContainer {
                 updateHelloProperties(messageTypeSent, concreteMessageSent);
                 break;
             case RESUMING_HELLO:
+            case TLS13_RESUMING_HELLO:
                 handshakeStartedPropertyUpdate();
                 newResumptionHandshakePropertyUpdate((ResumingClientHelloWord) concreteMessageSent);
                 break;
@@ -126,11 +127,10 @@ public class ServerContextPropertyContainer extends ContextPropertyContainer {
                 // in session resumption before sending Client Fin
                 setContextProperties(ContextProperty.CAN_RESUME_CORRECTLY_TLS12);
             } else if (doPropertiesApply(ContextProperty.IS_TLS13_FLOW)
-                    && doPropertiesApply(ContextProperty.FINISHED_RECEIVED)) {
+                    && doPropertiesApply(ContextProperty.HANDSHAKE_FINISHED_CORRECTLY)) {
                 setContextProperties(ContextProperty.RECEIVED_TICKET);
                 // as for TLS 1.2, it's also allowed to immediately use a ticket
                 // received before sending Client Fin
-                // todo: tls attacker cant do this
                 setContextProperties(ContextProperty.CAN_RESUME_CORRECTLY_TLS13);
             }
         }

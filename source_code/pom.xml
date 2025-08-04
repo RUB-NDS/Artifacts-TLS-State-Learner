@@ -160,7 +160,7 @@
                                     </artifactItem>
                                 </artifactItems>
                                 <!--suppress UnresolvedMavenProperty -->
-                                <outputDirectory>${maven.multiModuleProjectDirectory}/apps</outputDirectory>
+                                <outputDirectory>${session.executionRootDirectory}/apps</outputDirectory>
                             </configuration>
                         </execution>
                         <execution>
@@ -170,7 +170,7 @@
                             </goals>
                             <phase>package</phase>
                             <configuration>
-                                <outputDirectory>${maven.multiModuleProjectDirectory}/apps/lib</outputDirectory>
+                                <outputDirectory>${session.executionRootDirectory}/apps/lib</outputDirectory>
                                 <!--Ensures only runnable dependencies are included-->
                                 <includeScope>compile</includeScope>
                             </configuration>
@@ -225,7 +225,7 @@
                             <filesets>
                                 <fileset>
                                     <!--suppress UnresolvedMavenProperty -->
-                                    <directory>${maven.multiModuleProjectDirectory}/apps</directory>
+                                    <directory>${session.executionRootDirectory}/apps</directory>
                                 </fileset>
                             </filesets>
                         </configuration>
@@ -242,7 +242,7 @@
                             <filesets>
                                 <fileset>
                                     <!--suppress UnresolvedMavenProperty -->
-                                    <directory>${maven.multiModuleProjectDirectory}/apps</directory>
+                                    <directory>${session.executionRootDirectory}/apps</directory>
                                 </fileset>
                             </filesets>
                         </configuration>

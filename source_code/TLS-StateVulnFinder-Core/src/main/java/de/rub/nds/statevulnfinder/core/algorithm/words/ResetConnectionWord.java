@@ -15,12 +15,8 @@ import de.rub.nds.tlsattacker.core.workflow.action.ResetConnectionAction;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlsscanner.core.vector.response.ResponseFingerprint;
 import java.util.LinkedList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class ResetConnectionWord extends TlsWord {
-    private static Long lastMsTimestamp = 0L;
-    private static final Logger LOG = LogManager.getLogger();
 
     public ResetConnectionWord() {
         super(TlsWordType.RESET_CONNECTION);
@@ -29,35 +25,9 @@ public class ResetConnectionWord extends TlsWord {
     @Override
     public ResponseFingerprint execute(State state, ReceiveHint receiveHint) {
         ResetConnectionAction resetConnectionAction =
-                new ResetConnectionAction(state.getTlsContext().getConnection().getAlias(), 10);
-        int attempts = 0;
-        do {
-            if (attempts > 0) {
-                sleepFor100ms();
-            }
-
-            resetConnectionAction.reset();
-            resetConnectionAction.execute(state);
-            attempts++;
-        } while (!resetConnectionAction.executedAsPlanned() && attempts < 10);
-        long currentMs = System.currentTimeMillis();
-        if (!resetConnectionAction.executedAsPlanned()
-                || (attempts > 1 && currentMs - lastMsTimestamp > 60000)) {
-            LOG.info(
-                    "Reset connection as planned: {} in {} attempts",
-                    resetConnectionAction.executedAsPlanned(),
-                    attempts);
-            lastMsTimestamp = System.currentTimeMillis();
-        }
+                new ResetConnectionAction(state.getTlsContext().getConnection().getAlias());
+        resetConnectionAction.execute(state);
         return new ResponseFingerprint(new LinkedList<>(), new LinkedList<>(), SocketState.UP);
-    }
-
-    private void sleepFor100ms() {
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ex) {
-            LOG.error("Sleep interrupted", ex);
-        }
     }
 
     @Override

@@ -8,9 +8,7 @@
  */
 package de.rub.nds.statevulnfinder.core.algorithm.words;
 
-import de.rub.nds.statevulnfinder.core.config.VulnerabilityFinderConfig;
 import de.rub.nds.statevulnfinder.core.constants.TlsWordType;
-import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -38,20 +36,7 @@ public abstract class HelloWord extends TlsWord {
 
     @Override
     public String toString() {
-        if (VulnerabilityFinderConfig.SIMPLE_CIPHER_SUITE_EXPORT_MODE) {
-            String suiteString = "";
-            if (cipherSuite.isTLS13()) {
-                suiteString = "TLS13";
-            } else {
-                suiteString =
-                        AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite).name().split("_")[0]
-                                + "+"
-                                + AlgorithmResolver.getCipherType(cipherSuite).name();
-            }
-            return getHelloType() + "HelloWord{" + "suite=" + suiteString + '}';
-        } else {
-            return getHelloType() + "HelloWord{" + "suite=" + cipherSuite + '}';
-        }
+        return getHelloType() + "HelloWord{" + "suite=" + cipherSuite + '}';
     }
 
     @Override

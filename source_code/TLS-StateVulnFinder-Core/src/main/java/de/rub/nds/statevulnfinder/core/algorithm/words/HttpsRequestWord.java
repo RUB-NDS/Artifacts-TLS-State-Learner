@@ -71,7 +71,6 @@ public class HttpsRequestWord extends TlsWord {
         String httpRequest = HTTP_REQUEST_PREFIX + hostname + HTTP_REQUEST_SUFFIX;
         byte[] encodedRequest = httpRequest.getBytes();
         ApplicationMessage appData = new ApplicationMessage(encodedRequest);
-        // HttpRequestMessage httpsRequest = new HttpRequestMessage(state.getConfig());
         sendMessage(appData, new Record(), state);
         return receiveMessages(state, receiveHint);
     }

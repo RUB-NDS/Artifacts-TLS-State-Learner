@@ -62,6 +62,8 @@ public class ServerExpectedResponseProvider extends ExpectedResponseProvider {
 
     private final ExpectedResponse[] expectedTls13ServerResponses =
             new ExpectedResponse[] {
+                new ExpectedResponse(TlsWordType.EMPTY_CERTIFICATE),
+                new ExpectedResponse(TlsWordType.CERTIFICATE_VERIFY),
                 new ExpectedResponse(TlsWordType.RESET_CONNECTION),
                 new ExpectedResponse(TlsWordType.ANY_CCS),
                 new ExpectedResponse(TlsWordType.KEY_UPDATE, KeyUpdateMessage.class),
@@ -128,7 +130,7 @@ public class ServerExpectedResponseProvider extends ExpectedResponseProvider {
                     // note that the code flow allows a server to perform a full handshake even upon
                     // PSK resumption
                     new ExpectedResponse(
-                            TlsWordType.RESUMING_HELLO,
+                            TlsWordType.TLS13_RESUMING_HELLO,
                             ContextProperty.CAN_RESUME_CORRECTLY_TLS13,
                             ServerHelloMessage.class,
                             EncryptedExtensionsMessage.class,

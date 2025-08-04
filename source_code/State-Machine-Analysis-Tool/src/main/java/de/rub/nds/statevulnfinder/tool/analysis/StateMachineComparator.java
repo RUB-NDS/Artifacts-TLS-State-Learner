@@ -9,14 +9,17 @@
 package de.rub.nds.statevulnfinder.tool.analysis;
 
 import de.rub.nds.statevulnfinder.core.StateMachine;
+import de.rub.nds.statevulnfinder.core.algorithm.words.HRREnforcingClientHelloWord;
+import de.rub.nds.statevulnfinder.core.algorithm.words.HelloWord;
 import de.rub.nds.statevulnfinder.core.algorithm.words.TlsWord;
 import de.rub.nds.statevulnfinder.core.analysis.Analyzer;
 import de.rub.nds.statevulnfinder.core.analysis.GraphDetails;
 import de.rub.nds.statevulnfinder.core.analysis.utils.SulResponse;
-import de.rub.nds.statevulnfinder.core.config.VulnerabilityFinderConfig;
 import de.rub.nds.statevulnfinder.core.constants.TlsWordType;
 import de.rub.nds.statevulnfinder.core.util.TestUtils;
 import de.rub.nds.statevulnfinder.server.extraction.TlsServerSulProvider;
+import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlsscanner.core.vector.response.EqualityError;
@@ -61,7 +64,6 @@ public class StateMachineComparator {
 
     public static ComparisonResult compare(
             StateMachine sm1, StateMachine sm2, GraphDetails detailsSm1, GraphDetails detailsSm2) {
-        VulnerabilityFinderConfig.SIMPLE_CIPHER_SUITE_EXPORT_MODE = true;
         if (detailsSm2 == null) {
             detailsSm2 = new GraphDetails();
             Analyzer analyzer = new TlsServerSulProvider().getAnalyzer(detailsSm2);
@@ -330,36 +332,6 @@ public class StateMachineComparator {
         return results;
     }
 
-    private static List<ComparisonResult> crossCompareAllEntriesBackup(
-            List<ComparisonEntry> entries) {
-        List<ComparisonResult> results = new LinkedList<>();
-        long toCompare = (entries.size() * (entries.size() - 1)) / 2;
-        long compared = 0;
-        for (int i = 0; i < entries.size(); i++) {
-            for (int j = i + 1; j < entries.size(); j++) {
-                ComparisonEntry entry1 = entries.get(i);
-                ComparisonEntry entry2 = entries.get(j);
-                ComparisonResult result =
-                        compare(
-                                entry1.getStateMachine(),
-                                entry2.getStateMachine(),
-                                entry1.getGraphDetails(),
-                                entry2.getGraphDetails());
-                LOG.info(
-                        "Comparing {} to {}: Similarity: {}, Edges: {}",
-                        entry1.getName(),
-                        entry2.getName(),
-                        result.getSimilarity(),
-                        result.getEdgesTested());
-                compared++;
-                result.setIdentifier(entry1.getName() + "," + entry2.getName());
-                results.add(result);
-                LOG.info("Compared {}/{}", compared, toCompare);
-            }
-        }
-        return results;
-    }
-
     public static Map<TlsWord, TlsWord> getSharedAlphabetMap(
             List<TlsWord> baseAlphabet, Alphabet<TlsWord> comparisonAlphabet) {
         HashMap<TlsWord, TlsWord> sharedAlphabetMap = new HashMap<>();
@@ -379,7 +351,7 @@ public class StateMachineComparator {
     private static TlsWord getEquivalent(TlsWord word, Alphabet<TlsWord> comparisonAlphabet) {
         TlsWord equivalent = null;
         for (TlsWord comparisonWord : comparisonAlphabet) {
-            if (word.toString().equals(comparisonWord.toString())) {
+            if (getSimplifiedWordString(word).equals(getSimplifiedWordString(comparisonWord))) {
                 if (equivalent == null) {
                     equivalent = comparisonWord;
                 } else {
@@ -388,6 +360,29 @@ public class StateMachineComparator {
             }
         }
         return equivalent;
+    }
+
+    private static String getSimplifiedWordString(TlsWord word) {
+        if (word instanceof HelloWord) {
+            HelloWord helloWord = (HelloWord) word;
+            CipherSuite cipherSuite = helloWord.getSuite();
+            String suiteString;
+            if (cipherSuite.isTLS13()) {
+                suiteString = "TLS13";
+            } else {
+                suiteString =
+                        AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite).name().split("_")[0]
+                                + "+"
+                                + AlgorithmResolver.getCipherType(cipherSuite).name();
+            }
+
+            if (word instanceof HRREnforcingClientHelloWord) {
+                return "HRREnforcingClientHello{" + suiteString + "}";
+            } else {
+                return helloWord.getHelloType() + "HelloWord{suite=" + suiteString + '}';
+            }
+        }
+        return word.toString();
     }
 
     public static ComparisonResult compareEdges(

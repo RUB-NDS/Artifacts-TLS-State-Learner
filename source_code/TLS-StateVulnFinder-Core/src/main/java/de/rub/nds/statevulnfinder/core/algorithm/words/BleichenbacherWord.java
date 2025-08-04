@@ -8,7 +8,6 @@
  */
 package de.rub.nds.statevulnfinder.core.algorithm.words;
 
-import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.statevulnfinder.core.constants.TlsWordType;
 import de.rub.nds.statevulnfinder.core.sul.ReceiveHint;
@@ -43,9 +42,6 @@ public class BleichenbacherWord extends TlsWord {
 
     public BleichenbacherWord(Pkcs1Vector vector) {
         super(TlsWordType.BLEICHENBACHER);
-        vector.setEncryptedValue(
-                ArrayConverter.hexStringToByteArray(
-                        "526564616374656420666f7220616e6f6e796d697479"));
         this.vector = vector;
     }
 

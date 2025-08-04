@@ -51,6 +51,7 @@ public class BenignSubgraphClassifier extends Classifier {
     private HashMap<Object, Set<String>> stateNameMap;
     private Set<Object> coveredTransitions;
     private Set<Object> reportedTransitions;
+    private Set<Object> coveredErrorStates;
     private final TransitionAnalyzerProvider transitionAnalyzerProvider;
     private Object initialState;
 
@@ -65,6 +66,7 @@ public class BenignSubgraphClassifier extends Classifier {
         stateInputMap = new HashMap<>();
         stateNameMap = new HashMap<>();
         reportedTransitions = new HashSet<>();
+        coveredErrorStates = new HashSet<>();
         List<StateMachineIssue> determinedQuirks = new LinkedList<>();
         graphDetails.setHappyFlowsTransitions(new HashSet<>());
         graphDetails.setBenignStateInfoMap(new HashMap<>());
@@ -80,6 +82,7 @@ public class BenignSubgraphClassifier extends Classifier {
     }
 
     private void checkConflictingContextProperties(
+            Stack<TlsWord> messageStack,
             Object state,
             Set<ContextProperty> reachedProperties,
             List<StateMachineIssue> determinedQuirks) {
@@ -92,7 +95,13 @@ public class BenignSubgraphClassifier extends Classifier {
                     propertiesRegisteredForState, reachedProperties)) {
                 determinedQuirks.add(
                         new StateConfusionIssue(
-                                new LinkedList<>(),
+                                new ArrayList<>(
+                                        graphDetails
+                                                .getStateInfo(state)
+                                                .getKnownReachingMessageSequences()
+                                                .iterator()
+                                                .next()),
+                                new ArrayList<>(messageStack),
                                 "State "
                                         + state
                                         + " has conflicting context properties "
@@ -144,7 +153,10 @@ public class BenignSubgraphClassifier extends Classifier {
             nameState(messageStack, state, determinedQuirks, transitionAnalyzer);
             allowedTransitions = transitionAnalyzer.getAllowedSuccessors();
             checkConflictingContextProperties(
-                    state, transitionAnalyzer.getContextPropertiesReached(), determinedQuirks);
+                    messageStack,
+                    state,
+                    transitionAnalyzer.getContextPropertiesReached(),
+                    determinedQuirks);
             graphDetails.getStateInfo(state).updateTransitionInfo(transitionAnalyzer);
         } else if (allowResetConnection) {
             // we keep tracing the subgraph when reaching an error state
@@ -193,6 +205,71 @@ public class BenignSubgraphClassifier extends Classifier {
                         machine, nextState, messageStack, determinedQuirks, allowResetConnection);
             }
             messageStack.pop();
+        }
+
+        traceThroughUniqueErrorStates(
+                machine,
+                state,
+                messageStack,
+                determinedQuirks,
+                allowResetConnection,
+                allowedTransitions);
+    }
+
+    /**
+     * This method traces through all error states that are not yet covered by the current
+     * classification. This allows us to assign labels to states beyond a connection reset. Usually,
+     * we expect this to be achieved through the connection reset word but some hosts ignore,
+     * leaving some states without labels in the visualization.
+     *
+     * @param machine The state machine we are currently analyzing
+     * @param state The current state in the depth first search algorithm
+     * @param messageStack The messages we sent so far (excluding 'input')
+     * @param determinedQuirks The list of determined issues
+     * @param allowResetConnection Determines if subgraph tracing may leave an error state via
+     *     connection reset
+     * @param allowedTransitions The list of allowed transitions from the current state
+     */
+    private void traceThroughUniqueErrorStates(
+            StateMachine machine,
+            Object state,
+            Stack<TlsWord> messageStack,
+            List<StateMachineIssue> determinedQuirks,
+            boolean allowResetConnection,
+            List<TlsWord> allowedTransitions) {
+        if (allowResetConnection
+                && graphDetails.getErrorStates() != null
+                && !graphDetails.getErrorStates().isEmpty()) {
+            List<TlsWord> illegalInputs = new LinkedList<>(machine.getAlphabet());
+            illegalInputs.removeAll(allowedTransitions);
+            for (TlsWord thisIllegalInput : illegalInputs) {
+                Object successor = machine.getMealyMachine().getSuccessor(state, thisIllegalInput);
+                if (graphDetails.isErrorState(successor)
+                        && !coveredErrorStates.contains(successor)) {
+                    Object resetConnectionState =
+                            machine.getMealyMachine()
+                                    .getSuccessor(successor, new ResetConnectionWord());
+                    coveredErrorStates.add(successor);
+                    if (!stateNameMap.containsKey(resetConnectionState)) {
+                        stateNameMap.put(
+                                resetConnectionState,
+                                new HashSet<>(List.of(TlsWordType.RESET_CONNECTION.name())));
+                    }
+                    // add illegal input and enforce reset connection - no other inputs should yield
+                    // a meaningful state
+                    messageStack.add(thisIllegalInput);
+                    messageStack.add(new ResetConnectionWord());
+                    findBenignSubgraph(
+                            machine,
+                            resetConnectionState,
+                            messageStack,
+                            determinedQuirks,
+                            allowResetConnection);
+                    // pop illegal input and reset connection word
+                    messageStack.pop();
+                    messageStack.pop();
+                }
+            }
         }
     }
 
@@ -295,6 +372,12 @@ public class BenignSubgraphClassifier extends Classifier {
                 if (!isBenignRename(knownNames, lastSentType, transitionAnalyzer)) {
                     determinedQuirks.add(
                             new StateConfusionIssue(
+                                    new ArrayList<>(
+                                            graphDetails
+                                                    .getStateInfo(state)
+                                                    .getKnownReachingMessageSequences()
+                                                    .iterator()
+                                                    .next()),
                                     new ArrayList<>(messageStack),
                                     "State "
                                             + state
@@ -306,6 +389,7 @@ public class BenignSubgraphClassifier extends Classifier {
                 knownNames.add(lastSentType.name());
                 graphDetails.getStateInfo(state).addName(lastSentType.name());
             }
+            graphDetails.getStateInfo(state).addKnownReachingMessageSequence(messageStack);
         }
     }
 

@@ -182,13 +182,11 @@ public class FastMealySULCache implements SUL<TlsWord, SulResponse> {
                 if (out.isIllegalTransitionFlag()) {
                     cacheStateTracker.setSimulateError(true);
                 }
-            } else if (!cacheStateTracker.isSimulateError()
-                    || (finderConfig.isNoCacheTrapping() && !cacheStateTracker.isUpdateCache())) {
+            } else if (!cacheStateTracker.isSimulateError()) {
                 // on a cache miss: query all answered queries with our delegate to prepare our
                 // cache update
                 lock.readLock().unlock();
-                if (cacheStateTracker.wordCanBeFiltered(in, outputWord, fastCache)
-                        && !finderConfig.isNoCacheTrapping()) {
+                if (cacheStateTracker.wordCanBeFiltered(in, outputWord, fastCache)) {
                     // we cached all transitions so far and next word would lead to
                     // IllegalLearnerState
                     out = errorResponse;
@@ -210,8 +208,7 @@ public class FastMealySULCache implements SUL<TlsWord, SulResponse> {
 
         inputWord.append(in);
         if (usingDelegate) {
-            if (cacheStateTracker.wordCanBeFiltered(in, outputWord, fastCache)
-                    && !finderConfig.isNoCacheTrapping()) {
+            if (cacheStateTracker.wordCanBeFiltered(in, outputWord, fastCache)) {
                 out = errorResponse;
             } else {
                 try {
@@ -243,8 +240,7 @@ public class FastMealySULCache implements SUL<TlsWord, SulResponse> {
         cacheStateTracker.reset();
         for (TlsWord prevSym : inputWord) {
             SulResponse prevOut;
-            if (cacheStateTracker.wordCanBeFiltered(prevSym, outputWord, fastCache)
-                    && !finderConfig.isNoCacheTrapping()) {
+            if (cacheStateTracker.wordCanBeFiltered(prevSym, outputWord, fastCache)) {
                 prevOut = errorResponse;
             } else {
                 ResponseFingerprint expectedResponseFingerprint =
@@ -304,7 +300,6 @@ public class FastMealySULCache implements SUL<TlsWord, SulResponse> {
                     cacheGraph.getTransition(curr, sym);
             if (trans == null) {
                 // from here the cache has a miss and we, therefore, update it with a new node
-
                 FastMealyState<SulResponse> fastMealyState = cacheGraph.addState();
 
                 cacheGraph.setTransition(
@@ -342,8 +337,8 @@ public class FastMealySULCache implements SUL<TlsWord, SulResponse> {
             }
             wordBuilder.append(out);
         }
-        if (overwrite && cacheGraph.size() < 50000) {
-            // clearOrphanedStates();
+        if (overwrite && cacheGraph.size() < 30000) {
+            clearOrphanedStates();
         }
     }
 

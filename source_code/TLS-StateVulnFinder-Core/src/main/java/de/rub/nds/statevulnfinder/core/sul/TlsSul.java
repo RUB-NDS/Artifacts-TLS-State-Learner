@@ -32,7 +32,6 @@ import de.rub.nds.tlsattacker.transport.TransportHandler;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.List;
 import net.automatalib.words.Word;
 import net.automatalib.words.WordBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -70,10 +69,6 @@ public abstract class TlsSul implements HintedSUL<TlsWord, SulResponse> {
     private final ScanReport scanReport;
 
     private boolean confirmingVulnerabilities = false;
-
-    private long timesBlockAssumed = 0;
-
-    List<Long> daysRunningReported = new LinkedList<>();
 
     public TlsSul(VulnerabilityFinderConfig vulnerabilityFinderConfig, ScanReport scanReport) {
         this.delegate = vulnerabilityFinderConfig.getSulDelegate();
@@ -181,11 +176,10 @@ public abstract class TlsSul implements HintedSUL<TlsWord, SulResponse> {
             } catch (IOException ex) {
                 if (initializationAttempts >= 3) {
                     boolean connectionHealthy = ConnectivityChecker.connectionIsAlive();
-                    if (connectionHealthy && !pausedAndRetried && timesBlockAssumed < 4) {
+                    if (connectionHealthy && !pausedAndRetried) {
                         LOG.warn(
                                 "Initialization to {} failed but Internet connection seems healthy. Will sleep and retry once more in 2h.",
                                 vulnerabilityFinderConfig.getImplementationName());
-                        timesBlockAssumed += 1;
                         sleepFor(7200000);
                         initializationAttempts = 0;
                         pausedAndRetried = true;
@@ -198,14 +192,13 @@ public abstract class TlsSul implements HintedSUL<TlsWord, SulResponse> {
                         initializationAttempts = 0;
                         pausedAndRetried = false;
                         retryInitialization = true;
-                    } else if (connectionHealthy && (pausedAndRetried || timesBlockAssumed >= 4)) {
+                    } else if (connectionHealthy && pausedAndRetried) {
                         LOG.warn(
                                 "Still unable to reconnect to {} after 2h. Aborting learning.",
                                 vulnerabilityFinderConfig.getImplementationName());
                         throw new LimitExceededException(
                                 LimitExceededException.LimitationType.INITIALIZATION);
                     }
-
                 } else {
                     retryInitialization = true;
                 }

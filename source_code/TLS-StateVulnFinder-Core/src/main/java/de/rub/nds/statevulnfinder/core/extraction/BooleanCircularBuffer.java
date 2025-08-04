@@ -8,9 +8,6 @@
  */
 package de.rub.nds.statevulnfinder.core.extraction;
 
-/**
- * @author marcel
- */
 public class BooleanCircularBuffer {
     private final boolean[] buffer;
     private int head;

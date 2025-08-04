@@ -13,6 +13,7 @@ import de.rub.nds.statevulnfinder.core.analysis.transitions.ContextProperty;
 import de.rub.nds.statevulnfinder.core.analysis.transitions.TransitionAnalyzer;
 import de.rub.nds.statevulnfinder.core.constants.TlsWordType;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ public class TlsBenignStateInfo {
     private final Set<TlsWord> benignInputs;
     // contains all inputs of **traversed** paths that lead to this state
     private final Set<TlsWordType> inputHistory;
+    private final Set<List<TlsWord>> knownReachingMessageSequences;
     private final Set<ContextProperty> contextPropertiesWhenReached;
 
     private final Set<TlsWord> rejectedOptionalInputs;
@@ -38,6 +40,7 @@ public class TlsBenignStateInfo {
         inputHistory = new HashSet<>();
         rejectedOptionalInputs = new HashSet<>();
         rejectedExpectedInputs = new HashSet<>();
+        knownReachingMessageSequences = new HashSet<>();
     }
 
     public void addName(String name) {
@@ -129,5 +132,13 @@ public class TlsBenignStateInfo {
 
     public Set<TlsWordType> getInputHistory() {
         return inputHistory;
+    }
+
+    public Set<List<TlsWord>> getKnownReachingMessageSequences() {
+        return knownReachingMessageSequences;
+    }
+
+    public void addKnownReachingMessageSequence(List<TlsWord> messageSequence) {
+        knownReachingMessageSequences.add(messageSequence);
     }
 }

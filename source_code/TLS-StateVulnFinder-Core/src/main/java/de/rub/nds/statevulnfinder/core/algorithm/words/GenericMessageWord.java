@@ -111,7 +111,7 @@ public class GenericMessageWord extends TlsWord {
                                 == AlertDescription.CLOSE_NOTIFY.getValue())) {
             return TlsWordType.CLOSE_NOTIFY;
         } else if (message instanceof CertificateMessage) {
-            return TlsWordType.EMPTY_CERTIFICATE;
+            return TlsWordType.CERTIFICATE;
         } else if (message instanceof ServerHelloDoneMessage) {
             return TlsWordType.SERVER_HELLO_DONE;
         } else if (message instanceof HelloRequestMessage) {

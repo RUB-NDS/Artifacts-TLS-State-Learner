@@ -1,7 +1,7 @@
 /*
- * TLS-StateBulnFinder - A state machine analysis tool based on TLS-Attacker
+ * TLS-StateVulnFinder - A state machine analysis tool based on TLS-Attacker
  *
- * Copyright 2020-2023 Ruhr University Bochum and Paderborn University
+ * Copyright 2020-2025 Ruhr University Bochum and Paderborn University
  *
  * Licensed under Apache License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0.txt
@@ -16,10 +16,13 @@ import java.util.List;
 public class StateConfusionIssue extends StateMachineIssue implements GuidedEquivalenceTestIssue {
 
     private final List<TlsWord> secondPathToState;
+    private final List<TlsWord> firstPathToState;
 
-    public StateConfusionIssue(List<TlsWord> secondPathToState, String reason) {
+    public StateConfusionIssue(
+            List<TlsWord> fistPathToState, List<TlsWord> secondPathToState, String reason) {
         super(StateMachineIssueType.STATE_CONFUSION, reason);
         this.secondPathToState = secondPathToState;
+        this.firstPathToState = fistPathToState;
     }
 
     @Override
@@ -36,6 +39,6 @@ public class StateConfusionIssue extends StateMachineIssue implements GuidedEqui
 
     @Override
     public List<List<TlsWord>> getEquivalenceTestStartPaths() {
-        return Arrays.asList(getPath());
+        return Arrays.asList(secondPathToState, firstPathToState);
     }
 }

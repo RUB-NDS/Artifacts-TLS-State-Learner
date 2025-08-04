@@ -106,6 +106,8 @@ public class StateMachineAnalysisTool {
         commandRegistry.register(new ExitCommand());
         commandRegistry.register(new AnalyzeCommand());
         commandRegistry.register(new AlphabetCommand());
+        commandRegistry.register(new AllowedResponsesCommand());
+        commandRegistry.register(new AllowedSuccessorsCommand());
         commandRegistry.register(new DiffStatesCommand());
         commandRegistry.register(new SuccessorsCommand());
         commandRegistry.register(new PredecessorsCommand());

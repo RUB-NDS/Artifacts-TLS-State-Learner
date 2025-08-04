@@ -74,6 +74,10 @@ public enum ContextProperty {
                     // ephemeral / static cipher suite is not a conflict as the difference in server
                     // behavior is only visible when sending the CH that sets this property
                     continue;
+                } else if (property == IN_RESUMPTION_FLOW
+                        && setA.contains(ContextProperty.IS_TLS13_FLOW)
+                        && setB.contains(ContextProperty.IS_TLS13_FLOW)) {
+                    continue; // Resumption has no difference in TLS 1.3 if client auth is disabled
                 }
                 property.getNegatingProperty();
                 return false;

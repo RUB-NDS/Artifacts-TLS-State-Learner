@@ -14,6 +14,7 @@ import de.rub.nds.statevulnfinder.core.analysis.utils.SulResponse;
 import de.rub.nds.statevulnfinder.tool.main.command.AbstractCommand;
 import de.rub.nds.statevulnfinder.tool.main.command.CommandContext;
 import de.rub.nds.statevulnfinder.tool.main.command.CommandUtil;
+import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,22 +34,28 @@ public class SuccessorsCommand extends AbstractCommand {
 
     @Override
     public String getDescription() {
-        return "List successors of the specified state";
+        return "List successors of the specified state. Use -b for brief mode (excludes IllegalLearnerTransition and CLOSED socket responses)";
     }
 
     @Override
     public String getUsage() {
-        return "successors <state>";
+        return "successors [-b] <state>";
     }
 
     @Override
     protected boolean validateArguments(String[] args) {
-        if (args.length != 1) {
+        if (args.length < 1 || args.length > 2) {
+            return false;
+        }
+
+        // Check if -b flag is present
+        int stateArgIndex = args.length - 1;
+        if (args.length == 2 && !args[0].equals("-b")) {
             return false;
         }
 
         try {
-            Integer.parseInt(args[0]);
+            Integer.parseInt(args[stateArgIndex]);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -57,7 +64,16 @@ public class SuccessorsCommand extends AbstractCommand {
 
     @Override
     protected void executeCommand(String[] args, CommandContext context) {
-        int state = Integer.parseInt(args[0]);
+        // Parse arguments
+        boolean briefMode = false;
+        int stateArgIndex = 0;
+
+        if (args.length == 2 && args[0].equals("-b")) {
+            briefMode = true;
+            stateArgIndex = 1;
+        }
+
+        int state = Integer.parseInt(args[stateArgIndex]);
         StateMachine stateMachine = context.getStateMachine();
 
         List<Object> stateList = new LinkedList<>(stateMachine.getMealyMachine().getStates());
@@ -78,6 +94,11 @@ public class SuccessorsCommand extends AbstractCommand {
             SulResponse output =
                     (SulResponse) stateMachine.getMealyMachine().getOutput(stateObject, input);
 
+            // In brief mode, skip IllegalLearnerTransition and CLOSED socket responses
+            if (briefMode && shouldSkipInBriefMode(output)) {
+                continue;
+            }
+
             String quickSymbol = "";
             if (context.isGraphDetailsAnalyzed()) {
                 quickSymbol =
@@ -89,5 +110,21 @@ public class SuccessorsCommand extends AbstractCommand {
 
             LOG.info("s{} -> s{}{} for {} with {}", state, successor, quickSymbol, input, output);
         }
+    }
+
+    private boolean shouldSkipInBriefMode(SulResponse output) {
+        // Skip IllegalLearnerTransition
+        if (output.isIllegalTransitionFlag()) {
+            return true;
+        }
+
+        // Skip responses with CLOSED socket state
+        if (output.getResponseFingerprint() != null
+                && output.getResponseFingerprint().getSocketState() != null
+                && output.getResponseFingerprint().getSocketState() == SocketState.CLOSED) {
+            return true;
+        }
+
+        return false;
     }
 }

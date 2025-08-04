@@ -119,6 +119,11 @@ public class ServerTlsLetterChains extends TlsLetterChainProvider {
                         TlsWordType.FINISHED,
                         ContextProperty.HANDSHAKE_UNFINISHED,
                         ContextProperty.NOT_CLIENT_AUTH_REQUESTED),
+                new SimpleLetterChain(
+                        TlsWordType.TLS13_RESUMING_HELLO,
+                        TlsWordType.FINISHED,
+                        ContextProperty.HANDSHAKE_UNFINISHED,
+                        ContextProperty.NOT_CLIENT_AUTH_REQUESTED),
 
                 // optional client auth
                 new SimpleLetterChain(
@@ -134,7 +139,7 @@ public class ServerTlsLetterChains extends TlsLetterChainProvider {
                         TlsWordType.FINISHED, TlsWordType.KEY_UPDATE, TlsWordType.ANY_APP_DATA),
                 new SimpleLetterChain(
                         TlsWordType.RESET_CONNECTION,
-                        TlsWordType.RESUMING_HELLO,
+                        TlsWordType.TLS13_RESUMING_HELLO,
                         ContextProperty.CAN_RESUME_CORRECTLY_TLS13),
                 new SimpleLetterChain(TlsWordType.RESET_CONNECTION, TlsWordType.TLS13_CLIENT_HELLO),
                 new SimpleLetterChain(

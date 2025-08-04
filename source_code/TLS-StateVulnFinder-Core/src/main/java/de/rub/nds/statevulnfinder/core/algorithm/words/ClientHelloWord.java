@@ -127,14 +127,6 @@ public class ClientHelloWord extends HelloWord {
             state.getConfig().setAddPreSharedKeyExtension(false);
             state.getConfig().setAddCookieExtension(false);
         }
-        // if we uncomment this, following a handshake, sending a ClientHello will prompt an UNKOWN
-        // message
-        // in openssl, along with SERVER_HELLO, CHANGE_CIPHER_SPEC. This message appears to be a
-        // FINISHED message,
-        // encrypted with the keys generated for the session we have just cleared up.
-        // state.getTlsContext().getSessionList().clear();
-        // state.getTlsContext().setServerSessionId(null);
-        // state.getTlsContext().setClientSessionId(null);
 
         // GnuTls adaptation:
         state.getConfig().setAddHeartbeatExtension(true);
@@ -208,8 +200,7 @@ public class ClientHelloWord extends HelloWord {
     private void ensureClientRandomIsRetainedAfterHrr(State state, ClientHelloMessage clientHello) {
         if (digestIndicatesHelloRetryRequestFlow(state)
                 && state.getTlsContext().getClientRandom() != null) {
-            // disable for local library comparison
-            // clientHello.setRandom(Modifiable.explicit(state.getTlsContext().getClientRandom()));
+            clientHello.setRandom(Modifiable.explicit(state.getTlsContext().getClientRandom()));
         }
     }
 

@@ -29,7 +29,6 @@ import de.rub.nds.statevulnfinder.core.issue.StateMachineIssue;
 import de.rub.nds.statevulnfinder.core.sul.HintCounterSUL;
 import de.rub.nds.statevulnfinder.core.sul.HintedResetCounterSUL;
 import de.rub.nds.statevulnfinder.core.sul.HintedSUL;
-import de.rub.nds.statevulnfinder.core.sul.HintedSymbolCounterSUL;
 import de.rub.nds.statevulnfinder.core.sul.TimeMeasureSUL;
 import de.rub.nds.statevulnfinder.core.sul.TlsSul;
 import java.io.File;
@@ -53,7 +52,6 @@ public class Extractor {
     private TlsSul tlsSystemUnderTest;
     private TimeMeasureSUL timeMeasureSUL;
     private HintedSUL<TlsWord, SulResponse> wrappedSUL;
-    private HintedSymbolCounterSUL<TlsWord, SulResponse> hintedSymbolCounter;
     private HintedResetCounterSUL<TlsWord, SulResponse> postCacheResetCounterSul;
     private ResetCounterSUL<TlsWord, SulResponse> preCacheResetCounterSul;
     private HintCounterSUL<TlsWord, SulResponse> hintCounterSul;
@@ -91,8 +89,7 @@ public class Extractor {
         // set up timing measurements
         timeMeasureSUL = new TimeMeasureSUL(tlsSystemUnderTest);
         wrappedSUL = timeMeasureSUL;
-        // wrap TLS SUL/T in two SULs which analyze statistics
-        hintedSymbolCounter = new HintedSymbolCounterSUL<>("symbol counter", wrappedSUL);
+        // wrap TLS SUL/T in SULs which analyze statistics
         hintCounterSul = new HintCounterSUL<>("hint counter", wrappedSUL);
         postCacheResetCounterSul =
                 new HintedResetCounterSUL<>("post cache reset counter", hintCounterSul);
@@ -127,8 +124,7 @@ public class Extractor {
             do {
                 restartLearning = false;
                 try {
-                    provideResult(
-                            preCacheResetCounterSul, timeStamp, extractorResult, !restartLearning);
+                    provideResult(preCacheResetCounterSul, timeStamp, extractorResult);
                 } catch (TLSConflictException e) {
                     cacheConflicts++;
                     LOG.warn(
@@ -177,8 +173,7 @@ public class Extractor {
     private void provideResult(
             SUL<TlsWord, SulResponse> preCacheResetCounterSul,
             long startTime,
-            ExtractorResult extractorResult,
-            boolean firstAttemptOfAlphabet)
+            ExtractorResult extractorResult)
             throws ConflictException {
         tlsSystemUnderTest.setConfirmingVulnerabilities(false);
 

@@ -9,7 +9,6 @@
 package de.rub.nds.statevulnfinder.core.algorithm.words;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.statevulnfinder.core.config.VulnerabilityFinderConfig;
 import de.rub.nds.statevulnfinder.core.constants.TlsWordType;
 import de.rub.nds.statevulnfinder.core.sul.ReceiveHint;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -58,9 +57,6 @@ public class HRREnforcingClientHelloWord extends ClientHelloWord {
     @Override
     public String toString() {
         // output should be distinct from java-default ClientHello toString
-        if (VulnerabilityFinderConfig.SIMPLE_CIPHER_SUITE_EXPORT_MODE) {
-            return "HRREnforcingClientHello{TLS13}";
-        }
         return "HRREnforcingClientHello{suite=" + cipherSuite + "}";
     }
 

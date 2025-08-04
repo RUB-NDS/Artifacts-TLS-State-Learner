@@ -17,7 +17,6 @@ public class TimeoutHandler {
     private static final Logger LOG = LogManager.getLogger();
     private static final int FAST_INCREASE_TIMEOUT_CAP = 250;
     private static final int LETTERS_TO_IGNORE_AFTER_INCREASE = 100;
-    private static final int MIN_QUERIES_FOR_NEXT_LIMIT = 20;
 
     private final VulnerabilityFinderConfig finderConfig;
     private final BooleanCircularBuffer queriesIssued =
@@ -26,12 +25,6 @@ public class TimeoutHandler {
     private int increasedTimes = 0;
 
     private int queriedPrefixLettersSinceIncrease = 0;
-    private int consideredCacheExceptionsSinceIncrease = 0;
-    private int queriesSinceLimit = MIN_QUERIES_FOR_NEXT_LIMIT;
-
-    private int lastTimeoutCount = 0;
-
-    boolean reachedCriticalLimit = false;
 
     public TimeoutHandler(VulnerabilityFinderConfig finderConfig) {
         this.finderConfig = finderConfig;
@@ -39,7 +32,6 @@ public class TimeoutHandler {
 
     public void knownPrefixQueried(boolean cacheException) {
         queriedPrefixLettersSinceIncrease += 1;
-        queriesSinceLimit += 1;
 
         // we deliberately ignore possible cache exceptions after a TO increase to account for
         // multiple previously incorrectly assessed queries
@@ -59,35 +51,6 @@ public class TimeoutHandler {
             }
         } else {
             queriesIssued.add(false);
-        }
-    }
-
-    public void knownPrefixQueriedContinuous(boolean cacheException) {
-        queriedPrefixLettersSinceIncrease += 1;
-        queriesSinceLimit += 1;
-        if (queriedPrefixLettersSinceIncrease > LETTERS_TO_IGNORE_AFTER_INCREASE
-                && cacheException) {
-            // we deliberately ignore possible cache exceptions after a TO increase to account for
-            // multiple previously incorrectly assessed queries
-            consideredCacheExceptionsSinceIncrease += 1;
-            double exceptionRatio =
-                    (double) consideredCacheExceptionsSinceIncrease
-                            / queriedPrefixLettersSinceIncrease;
-            LOG.info(
-                    "Exception ratio is {} and TO {}",
-                    exceptionRatio,
-                    finderConfig.getMinTimeout());
-            if (exceptionRatio > 0.005 && queriesSinceLimit > MIN_QUERIES_FOR_NEXT_LIMIT) {
-                if (queriesSinceLimit > MIN_QUERIES_FOR_NEXT_LIMIT) {
-                    suggestIncreasedTimeout();
-                    queriesSinceLimit = 0;
-                    reachedCriticalLimit = true;
-                } else {
-                    LOG.info("Waiting before increase");
-                }
-            } else if (reachedCriticalLimit && timeoutSuggestions > 0 && exceptionRatio < 0.003) {
-                timeoutSuggestions -= 1;
-            }
         }
     }
 
@@ -116,8 +79,6 @@ public class TimeoutHandler {
                     finderConfig.getMinTimeout(),
                     finderConfig.getImplementationName());
             queriedPrefixLettersSinceIncrease = 0;
-            consideredCacheExceptionsSinceIncrease = 0;
-            queriesSinceLimit = 0;
             increasedTimes++;
         }
         timeoutSuggestions = 0;
