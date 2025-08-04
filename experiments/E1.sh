@@ -14,9 +14,10 @@ echo "(AE Script - E1) In particular, the CLI tool will be used to re-run our au
 # Expected files from setup.sh
 E1_XML="experiment_outputs/E1/alphabet-13/OpenSSL3.4.0.xml"
 E1_PDF="experiment_outputs/E1/alphabet-13/OpenSSL3.4.0_short.pdf"
+E1_LOG="experiment_outputs/E1/app.log"
 
 # Check if expected files already exist
-if [ -f "$E1_XML" ] && [ -f "$E1_PDF" ]; then
+if [ -f "$E1_XML" ] && [ -f "$E1_PDF" ] && [ -f "$E1_LOG" ]; then
     echo "(AE Script - E1) ✓ State machine files already exist."
     echo "(AE Script - E1) Press Enter to proceed with the inspection of the state machine."
     read -r
@@ -40,6 +41,11 @@ else
     
     if [ ! -f "$E1_PDF" ]; then
         echo "Error: State machine PDF file was not created"
+        exit 1
+    fi
+    
+    if [ ! -f "$E1_LOG" ]; then
+        echo "Error: App log file was not created"
         exit 1
     fi
     
@@ -105,5 +111,22 @@ echo "(AE Script - E1) You can take a look at experiment_outputs/E1/alphabet-13/
 echo "(AE Script - E1) As stated in C1, our tool iterates over increasingly larger alphabets to refine the state machine."
 echo "(AE Script - E1) To compare the extent to the state machine of a smaller alphabet, you can inspect experiment_outputs/E1/alphabet-1/OpenSSL3.4.0_short.pdf"
 echo "(AE Script - E1) Basic stats on the execution time and required queries for the individual alphabet should be written to experiment_outputs/E1/app.log"
+echo "(AE Script - E1) Subsequently, this script will try to parse stats for the first and last alphabet from this log. Press Enter to continue."
+read -r
+echo
+echo "(AE Script - E1) Stats for the first alphabet (alphabet-1):"
+echo "--------------------------------"
+awk '/Stats \(current alphabet\)/{flag=1; count=0} flag && count<12{print; count++} count==12{flag=0}' "$E1_LOG" | grep -A 11 -m 1 "Stats (current alphabet)" | tail -10
+echo
+echo "(AE Script - E1) Stats for the last alphabet (alphabet-13):"
+echo "--------------------------------"
+tac "$E1_LOG" | grep -B 11 -m 1 "Stats (current alphabet)" | tac | grep -A 10 "Statistics:" | tail -10
+echo
+echo "(AE Script - E1) You should see two blocks starting with 'Statistics:'."
+echo "(AE Script - E1) Below, it should indicate the number of queries by the learner and the ratio of cached queries."
+echo "(AE Script - E1) We expect this ratio to be above 97%."
+echo "(AE Script - E1) We rely on this value to support our claim C1 regarding the high cache efficiency (though we agree it is hard to confirm based solely on this log output)."
+echo "(AE Script - E1) It should further state how often a short timeout could be applied (by leveraging cached prefixes)."
+echo "(AE Script - E1) Finally, the stats of alphabet-1 should indicate a state machine with fewer states compared to alphabet-13."
 echo "(AE Script - E1) This is the end of E1. Press Enter to close."
 read -r

@@ -6,6 +6,7 @@ set -e
 echo "=== Artifact Evaluation - Preparation ==="
 echo
 echo "This script will build docker images and attempt to perform a basic test by running a docker container. This docker container will run tmux with two panes showing OpenSSL on the left and our tool on the right."
+echo "The basic test is expected to auto-close tmux and terminate the docker container unless an error is thrown by our tool."
 echo "Press Enter to begin the setup."
 read -r
 
@@ -58,19 +59,19 @@ echo "Step 2: Building Docker images..."
 echo
 
 echo "Building OpenSSL 3.4.0 Docker image..."
-docker build -f dockerfiles/Dockerfile-OpenSSL-34-Java -t openssl3-4-0-tls-learner .
+docker build -f dockerfiles/Dockerfile-OpenSSL-34-Java -t openssl3-4-0-tls-learner . 2>&1 | sed 's/^/[AE Docker Build - OpenSSL 3.4.0] /'
 check_status "OpenSSL 3.4.0 Docker build"
 echo "✓ OpenSSL 3.4 image built successfully"
 echo
 
 echo "Building OpenSSL 1.0.1j Docker image..."
-docker build -f dockerfiles/Dockerfile-OpenSSL-101j-Java -t openssl1-0-1j-tls-learner .
+docker build -f dockerfiles/Dockerfile-OpenSSL-101j-Java -t openssl1-0-1j-tls-learner . 2>&1 | sed 's/^/[AE Docker Build - OpenSSL 1.0.1j] /'
 check_status "OpenSSL 1.0.1j Docker build"
 echo "✓ OpenSSL 1.0.1j image built successfully"
 echo
 
 echo "Building State Machine Analysis Tool Docker image..."
-docker build -f dockerfiles/Dockerfile-Analysis-Tool -t state-machine-analysis-tool .
+docker build -f dockerfiles/Dockerfile-Analysis-Tool -t state-machine-analysis-tool . 2>&1 | sed 's/^/[AE Docker Build - Analysis Tool] /'
 check_status "State Machine Analysis Tool Docker build"
 echo "✓ State Machine Analysis Tool image built successfully"
 echo
