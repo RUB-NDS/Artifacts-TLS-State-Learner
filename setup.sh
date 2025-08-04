@@ -17,8 +17,44 @@ check_status() {
     fi
 }
 
-# Step 1: Build both Docker images
-echo "Step 1: Building Docker images..."
+# Step 1: Download and extract source code
+echo "Step 1: Downloading source code from Zenodo..."
+echo
+
+if [ -f "source_code.zip" ]; then
+    echo "Source code zip already exists, skipping download"
+else
+    if command -v wget &> /dev/null; then
+        echo "Using wget to download source code..."
+        wget -O source_code.zip "https://zenodo.org/records/15520933/files/source_code.zip?download=1"
+        check_status "Source code download with wget"
+    elif command -v curl &> /dev/null; then
+        echo "Using curl to download source code..."
+        curl -L -o source_code.zip "https://zenodo.org/records/15520933/files/source_code.zip?download=1"
+        check_status "Source code download with curl"
+    else
+        echo "Error: Neither wget nor curl is available. Please install one of them."
+        exit 1
+    fi
+fi
+
+echo "✓ Source code downloaded successfully"
+echo
+
+# Extract source code
+echo "Extracting source code..."
+if ! command -v unzip &> /dev/null; then
+    echo "Error: unzip is not installed. Please install it and run the script again."
+    exit 1
+fi
+
+unzip -q -o source_code.zip -d source_code
+check_status "Extracting source code"
+echo "✓ Source code extracted to source_code directory"
+echo
+
+# Step 2: Build both Docker images
+echo "Step 2: Building Docker images..."
 echo
 
 echo "Building OpenSSL 3.4.0 Docker image..."
@@ -39,7 +75,7 @@ check_status "State Machine Analysis Tool Docker build"
 echo "✓ State Machine Analysis Tool image built successfully"
 echo
 
-echo "Step 2: Downloading dataset from Zenodo..."
+echo "Step 3: Downloading dataset from Zenodo..."
 echo
 
 if [ -f "dataset.zip" ]; then
@@ -62,8 +98,8 @@ fi
 echo "✓ Dataset downloaded successfully"
 echo
 
-# Step 3: Extract dataset
-echo "Step 3: Extracting dataset..."
+# Step 4: Extract dataset
+echo "Step 4: Extracting dataset..."
 echo
 
 # Check if unzip is available
@@ -82,8 +118,8 @@ check_status "Extracting dataset"
 echo "✓ Dataset extracted to experiment_dataset"
 echo
 
-# Step 4: Create experiment output directories
-echo "Step 4: Creating experiment output directories..."
+# Step 5: Create experiment output directories
+echo "Step 5: Creating experiment output directories..."
 echo
 
 mkdir -p experiment_outputs/E1
@@ -101,7 +137,7 @@ check_status "Creating Basic_Test directory"
 echo "✓ Created experiment_outputs directory structure"
 echo
 
-echo "Step 5: Run basic test..."
+echo "Step 6: Run basic test..."
 echo
 
 docker run -it --rm \
